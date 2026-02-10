@@ -1,4 +1,4 @@
-﻿namespace IrisCinema.API.Entities
+﻿namespace IrisCinema.API.Models
 {
     public class Room
     {
