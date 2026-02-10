@@ -1,0 +1,6 @@
+@IrisCinema.API_HostAddress = http://localhost:5168
+
+GET {{IrisCinema.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
