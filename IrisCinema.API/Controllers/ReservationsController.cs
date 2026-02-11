@@ -10,8 +10,8 @@ using IrisCinema.API.Persistence;
 
 namespace IrisCinema.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class ReservationsController : ControllerBase
     {
         private readonly CinemaContext _context;
