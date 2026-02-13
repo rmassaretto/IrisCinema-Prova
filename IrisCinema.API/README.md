@@ -37,6 +37,8 @@ dotnet run
 
 https://localhost:5168
 
+https://iris-cinema-prova-d6hpvv05n-rodrigo-massaretto-s-projects.vercel.app/
+
 ## Author
 
 Rodrigo Massaretto
