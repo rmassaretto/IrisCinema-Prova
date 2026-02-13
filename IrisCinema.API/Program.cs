@@ -28,6 +28,16 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseAuthorization();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapGet("/", () =>
+{
+    return Results.Content(
+        "<h1>Rodrigo Massaretto</h1>",
+        "text/html");
+});
+
 app.MapControllers();
 
 app.Run();
