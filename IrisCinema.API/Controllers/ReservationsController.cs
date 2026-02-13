@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using Humanizer;
+using IrisCinema.API.DTO.Reservation;
+using IrisCinema.API.Models;
+using IrisCinema.API.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using IrisCinema.API.Models;
-using IrisCinema.API.Persistence;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IrisCinema.API.Controllers
 {
@@ -15,10 +18,12 @@ namespace IrisCinema.API.Controllers
     public class ReservationsController : ControllerBase
     {
         private readonly CinemaContext _context;
+        private readonly IMapper _mapper;
 
-        public ReservationsController(CinemaContext context)
+        public ReservationsController(CinemaContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Reservations
@@ -41,58 +46,43 @@ namespace IrisCinema.API.Controllers
 
             return reservation;
         }
-
-        // PUT: api/Reservations/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReservation(int id, Reservation reservation)
-        {
-            if (id != reservation.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(reservation).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ReservationExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
+        
         // POST: api/Reservations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
+        public async Task<ActionResult<Reservation>> PostReservation(CreateReservationDto dto)
         {
+            var seat = await _context.Seats.FindAsync(dto.SeatId);
+            if (seat == null)
+                return NotFound("Seat not found.");
+
+            if (seat.Reserved)
+                return Conflict("Seat already reserved.");
+
+            seat.Reserved = true;
+
+            var reservation = _mapper.Map<Reservation>(dto);
+
             _context.Reservations.Add(reservation);
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetReservation", new { id = reservation.Id }, reservation);
+            var response = _mapper.Map<ReservationResponseDto>(reservation);
+
+            return CreatedAtAction(nameof(GetReservation), new { id = response.Id }, response);
         }
 
         // DELETE: api/Reservations/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(int id)
         {
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation == null)
-            {
+            var reservation = await _context.Reservations.FirstOrDefaultAsync(r => r.Id == id);
+            if (reservation == null)            
                 return NotFound();
-            }
+
+            var seat = await _context.Seats.FirstOrDefaultAsync(s => s.Id == reservation.SeatId);
+            if (seat != null)
+                seat.Reserved = false;
 
             _context.Reservations.Remove(reservation);
             await _context.SaveChangesAsync();

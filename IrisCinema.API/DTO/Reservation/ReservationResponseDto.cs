@@ -1,15 +1,10 @@
-﻿namespace IrisCinema.API.Models
+﻿namespace IrisCinema.API.DTO.Reservation
 {
-    public class Reservation
+    public class ReservationResponseDto
     {
-        public Reservation()
-        {
-        }
-
         public int Id { get; set; }
         public string? Name { get; set; }
         public DateTime CreatedAt { get; set; }
-        public Seat Seat { get; set; } = null!;
         public int SeatId { get; set; }
     }
 }
